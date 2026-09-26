@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en" x-data="app()" :class="{'dark':dark}" class="scroll-smooth">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Vikri Alva Pratama — Freelance Full Stack Developer. I build complete web applications from database to deployment: fast, scalable and maintainable.">
+<meta name="keywords" content="full stack developer, freelance developer, backend, frontend, Laravel, PHP, MySQL, React, JavaScript, Node.js, GitHub, portfolio">
+<meta name="author" content="Vikri Alva Pratama">
+<meta property="og:title" content="Vikri Alva Pratama — Freelance Full Stack Developer">
+<meta property="og:description" content="I design, build and ship complete web applications — from API to pixel-perfect interface.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://vikrialva.dev">
+<title>Vikri Alva Pratama — Freelance Full Stack Developer</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      fontFamily: { display: ['PT Sans','sans-serif'], body: ['DM Sans','sans-serif'] },
+      colors: { accent: '#FF6B2B', 'accent-light': '#FF8F5C' }
+    }
+  }
+}
+</script>
+
+<style>
+*,*::before,*::after{box-sizing:border-box}
+html,body{font-family:'DM Sans',sans-serif}
+h1,h2,h3,h4,h5,h6{font-family:'PT Sans',sans-serif}
+body{transition:background-color .3s,color .3s}
+
+/* noise overlay */
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.35;
+background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.05'/%3E%3C/svg%3E")}
+
+/* scrollbar */
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#FF6B2B;border-radius:99px}
+
+/* reveal on scroll */
+.reveal{opacity:0;transform:translateY(26px);transition:opacity .6s cubic-bezier(.4,0,.2,1),transform .6s cubic-bezier(.4,0,.2,1)}
+.reveal.in{opacity:1;transform:none}
+.d1{transition-delay:.08s}.d2{transition-delay:.16s}.d3{transition-delay:.24s}.d4{transition-delay:.32s}
+
+/* nav underline animation */
+.nl{position:relative}
+.nl::after{content:'';position:absolute;bottom:-2px;left:0;width:0;height:1.5px;background:currentColor;transition:width .22s cubic-bezier(.4,0,.2,1)}
+.nl:hover::after,.nl.on::after{width:100%}
+.nl.on{font-weight:500}
+
+/* shimmer button */
+.shimmer{position:relative;overflow:hidden}
+.shimmer::after{content:'';position:absolute;top:0;left:-100%;width:60%;height:100%;background:rgba(255,255,255,.18);transform:skewX(-20deg);transition:left .4s cubic-bezier(.4,0,.2,1)}
+.shimmer:hover::after{left:160%}
+
+/* photo frames */
+.pf{overflow:hidden;background:#d4d4d8}
+.pf img{width:100%;height:100%;object-fit:cover;display:block}
+
+/* card hover */
+.card-h{transition:transform .28s cubic-bezier(.4,0,.2,1),border-color .18s}
+.card-h:hover{transform:translateY(-4px)}
+
+/* skill tag */
+.stag{transition:border-color .18s}
+
+[x-cloak]{display:none!important}
+</style>
+</head>
+
+<body class="bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 antialiased">
+
+<!-- ═══ NAV ═══ -->
+<header class="fixed inset-x-0 top-0 z-50 transition-all duration-300"
+  :class="sc?'bg-white/90 dark:bg-zinc-950/90 backdrop-blur-md shadow-sm shadow-black/5':''">
+  <nav class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between" aria-label="Main navigation">
+
+    <a href="#hero" class="font-display font-bold text-xl tracking-tight relative z-10">
+      <span class="text-zinc-900 dark:text-white">vikri alva </span><span class="text-accent">pratama</span>
+    </a>
+
+    <ul class="hidden md:flex items-center gap-8 text-sm" role="list">
+      <li><a href="#services" class="nl text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors" :class="s==='services'?'on !text-zinc-900 dark:!text-white':''" data-i18n="nav.services">Services</a></li>
+      <li><a href="#work"     class="nl text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors" :class="s==='work'?'on !text-zinc-900 dark:!text-white':''" data-i18n="nav.work">Work</a></li>
+      <li><a href="#about"   class="nl text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors" :class="s==='about'?'on !text-zinc-900 dark:!text-white':''" data-i18n="nav.about">About</a></li>
+      <li><a href="#contact" class="nl text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors" :class="s==='contact'?'on !text-zinc-900 dark:!text-white':''" data-i18n="nav.contact">Contact</a></li>
+    </ul>
+
+    <div class="flex items-center gap-3">
+      <!-- lang toggle -->
+      <button data-lang-toggle onclick="setLang(getLang()==='en'?'id':'en')" class="h-9 px-3 flex items-center justify-center rounded-full border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors text-xs font-bold tracking-wide" aria-label="Ganti bahasa / Switch language">
+        <span data-l="id">ID</span><span class="opacity-30 mx-0.5">/</span><span data-l="en">ENG</span>
+      </button>
+      <!-- dark toggle -->
+      <button @click="dark=!dark" class="w-9 h-9 flex items-center justify-center rounded-full border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors" :aria-label="dark?'Light mode':'Dark mode'">
+        <svg x-show="!dark" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        <svg x-show="dark"  class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"/></svg>
+      </button>
+      <!-- hire me -->
+      <a href="#contact" class="hidden md:inline-flex items-center gap-2 shimmer bg-accent text-white text-sm font-medium px-5 py-2 rounded-full hover:bg-accent-light transition-colors">
+        <span data-i18n="nav.hire">Hire me</span> <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+      </a>
+      <!-- hamburger -->
+      <button @click="mm=!mm" class="md:hidden w-9 h-9 flex items-center justify-center rounded-full border border-zinc-200 dark:border-zinc-800" :aria-expanded="mm" aria-label="Toggle menu">
+        <svg x-show="!mm" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        <svg x-show="mm"  class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+  </nav>
+
+  <!-- mobile menu -->
+  <div x-show="mm" x-cloak
+    x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0"
+    x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-2"
+    class="md:hidden bg-white dark:bg-zinc-950 border-t border-zinc-100 dark:border-zinc-900">
+    <ul class="flex flex-col px-6 py-5 gap-4 text-sm font-medium" role="list">
+      <li><a href="#services" @click="mm=false" class="block text-zinc-700 dark:text-zinc-300 hover:text-accent transition-colors" data-i18n="nav.services">Services</a></li>
+      <li><a href="#work"     @click="mm=false" class="block text-zinc-700 dark:text-zinc-300 hover:text-accent transition-colors" data-i18n="nav.work">Work</a></li>
+      <li><a href="#about"   @click="mm=false" class="block text-zinc-700 dark:text-zinc-300 hover:text-accent transition-colors" data-i18n="nav.about">About</a></li>
+      <li><a href="#contact" @click="mm=false" class="block text-zinc-700 dark:text-zinc-300 hover:text-accent transition-colors" data-i18n="nav.contact">Contact</a></li>
+      <li class="pt-2 border-t border-zinc-100 dark:border-zinc-900">
+        <a href="#contact" @click="mm=false" class="inline-flex shimmer bg-accent text-white font-medium text-sm px-5 py-2.5 rounded-full"><span data-i18n="nav.hire">Hire me</span> →</a>
+      </li>
+    </ul>
+  </div>
+</header>
+
+<main>
+
+<!-- ═══ HERO ═══ -->
+<section id="hero" class="relative min-h-screen flex items-center pt-16 overflow-hidden">
+  <div class="absolute top-1/4 right-0 w-96 h-96 bg-accent/10 rounded-full blur-3xl pointer-events-none" aria-hidden="true"></div>
+  <div class="absolute bottom-1/4 left-0 w-64 h-64 bg-zinc-200/50 dark:bg-zinc-800/30 rounded-full blur-3xl pointer-events-none" aria-hidden="true"></div>
+
+  <div class="relative z-10 max-w-6xl mx-auto px-6 py-24 w-full">
+    <div class="grid md:grid-cols-2 gap-12 items-center">
+
+      <div>
+        <p class="reveal text-sm font-medium text-accent tracking-widest uppercase mb-4" data-i18n="hero.avail">Available for work</p>
+        <h1 class="reveal d1 font-display font-bold text-5xl md:text-6xl lg:text-7xl leading-[1.05] tracking-tight text-zinc-900 dark:text-white mb-6" data-i18n-html="hero.hi">
+          Hi, I'm <span class="text-accent">Vikri Alva Pratama</span>
+        </h1>
+        <p class="reveal d2 text-lg md:text-xl text-zinc-500 dark:text-zinc-400 font-light leading-relaxed max-w-md mb-10" data-i18n-html="hero.tagline">
+          Freelance <strong class="font-medium text-zinc-700 dark:text-zinc-300">Full Stack Developer</strong>. I design, build and ship complete web applications — from database schema to pixel-perfect interface. Fast, scalable, maintainable.
+        </p>
+        <div class="reveal d3 flex flex-wrap gap-4">
+          <a href="#work" class="shimmer inline-flex items-center gap-2 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-medium px-7 py-3.5 rounded-full hover:bg-zinc-700 dark:hover:bg-zinc-200 transition-colors text-sm">
+            <span data-i18n="hero.cta1">View my work</span>
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </a>
+          <a href="#contact" class="inline-flex items-center gap-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 font-medium px-7 py-3.5 rounded-full hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors text-sm" data-i18n="hero.cta2">Get in touch</a>
+        </div>
+      </div>
+
+      <div class="reveal d2 flex justify-center md:justify-end">
+        <div class="relative w-72 h-72 md:w-80 md:h-80 lg:w-96 lg:h-96">
+          <div class="pf w-full h-full rounded-3xl">
+            <img src="image/profile.jpeg" alt="Vikri Alva Pratama — Freelance Full Stack Developer" loading="eager">
+          </div>
+          <div class="absolute -bottom-4 -left-4 bg-accent text-white font-display font-bold text-sm px-4 py-2.5 rounded-2xl shadow-lg" data-i18n="hero.badge">3+ Yrs Exp</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SERVICES ═══ -->
+<section id="services" class="py-24 bg-zinc-50 dark:bg-zinc-900/40">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="mb-14">
+      <p class="reveal text-xs font-medium text-accent tracking-widest uppercase mb-3" data-i18n="svc.eyebrow">What I do</p>
+      <h2 class="reveal d1 font-display font-bold text-4xl md:text-5xl text-zinc-900 dark:text-white" data-i18n="svc.title">Services</h2>
+    </div>
+    <div class="grid md:grid-cols-3 gap-6">
+
+      <article class="reveal d1 card-h group bg-white dark:bg-zinc-900 rounded-2xl p-8 border border-zinc-100 dark:border-zinc-800 hover:border-accent">
+        <div class="w-12 h-12 flex items-center justify-center bg-orange-50 dark:bg-zinc-800 rounded-xl mb-6 group-hover:bg-accent/10 transition-colors">
+          <svg class="w-6 h-6 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+        </div>
+        <h3 class="font-display font-bold text-xl text-zinc-900 dark:text-white mb-3" data-i18n="svc1.t">Frontend Development</h3>
+        <p class="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed" data-i18n="svc1.d">Modern, responsive interfaces with React and JavaScript, styled with Tailwind CSS. Pixel-perfect, accessible and blazing fast — with clean, well-tested code.</p>
+      </article>
+
+      <article class="reveal d2 card-h group bg-zinc-900 dark:bg-zinc-800 rounded-2xl p-8 border border-zinc-800 hover:border-accent">
+        <div class="w-12 h-12 flex items-center justify-center bg-zinc-800 dark:bg-zinc-700 rounded-xl mb-6 group-hover:bg-accent/20 transition-colors">
+          <svg class="w-6 h-6 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+        </div>
+        <h3 class="font-display font-bold text-xl text-white mb-3" data-i18n="svc2.t">Backend &amp; APIs</h3>
+        <p class="text-sm text-zinc-400 leading-relaxed" data-i18n="svc2.d">Robust APIs and web applications built with PHP and Laravel. Authentication, background jobs, payment integration and solid database design with MySQL.</p>
+      </article>
+
+      <article class="reveal d3 card-h group bg-white dark:bg-zinc-900 rounded-2xl p-8 border border-zinc-100 dark:border-zinc-800 hover:border-accent">
+        <div class="w-12 h-12 flex items-center justify-center bg-orange-50 dark:bg-zinc-800 rounded-xl mb-6 group-hover:bg-accent/10 transition-colors">
+          <svg class="w-6 h-6 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"/></svg>
+        </div>
+        <h3 class="font-display font-bold text-xl text-zinc-900 dark:text-white mb-3" data-i18n="svc3.t">DevOps &amp; Deployment</h3>
+        <p class="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed" data-i18n="svc3.d">Ship with confidence: Docker containers, CI/CD pipelines, cloud deployment (Vercel, AWS) plus monitoring, logging and automated testing baked in from day one.</p>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══ WORK ═══ -->
+<section id="work" class="py-24">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-14">
+      <div>
+        <p class="reveal text-xs font-medium text-accent tracking-widest uppercase mb-3" data-i18n="work.eyebrow">Portfolio</p>
+        <h2 class="reveal d1 font-display font-bold text-4xl md:text-5xl text-zinc-900 dark:text-white" data-i18n="work.title">Selected work</h2>
+      </div>
+      <a href="projects.html" class="reveal d1 text-sm font-medium text-zinc-500 dark:text-zinc-400 hover:text-accent transition-colors self-start sm:self-auto nl" data-i18n="work.all">All projects →</a>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-6">
+      <article class="card-h reveal d1 group rounded-2xl overflow-hidden bg-zinc-100 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 hover:border-accent">
+        <div class="pf w-full h-36 cursor-zoom-in" role="button" tabindex="0" aria-label="Open Web Sekolah gallery" data-gallery="websekolah/websekolah-1.png|websekolah/websekolah-2.jpg|websekolah/websekolah-3.jpg|websekolah/websekolah-4.jpg">
+          <img src="websekolah/websekolah-1.png" alt="Web Sekolah — tampilan utama" loading="lazy">
+          <span class="absolute top-3 right-3 text-xs bg-black/60 text-white px-2.5 py-1 rounded-full">1 / 4</span>
+        </div>
+        <div class="p-6">
+          <div class="flex flex-wrap gap-2 mb-3">
+            <span class="text-xs bg-orange-50 dark:bg-zinc-800 text-accent border border-orange-200 dark:border-zinc-700 px-3 py-1 rounded-full">Sekolah</span>
+            <span class="text-xs bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 px-3 py-1 rounded-full">Laravel</span>
+            <span class="text-xs bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 px-3 py-1 rounded-full">MySQL</span>
+          </div>
+          <a href="https://github.com/prayogi762/projek_smea" target="_blank" rel="noopener noreferrer">
+            <h3 class="font-display font-bold text-xl text-zinc-900 dark:text-white mb-1.5">Web Sekolah</h3>
+          </a>
+          <p class="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed mb-4" data-i18n="ws.d">Complete school website: profile, news &amp; announcements, photo gallery and contact — built with Laravel and MySQL on a responsive Tailwind UI. Click the cover to browse the screenshots.</p>
+          <a href="https://github.com/prayogi762/projek_smea" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-sm font-medium text-zinc-900 dark:text-white nl">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            <span data-i18n="ws.gh">View on GitHub →</span>
+          </a>
+        </div>
+      </article>
+
+      <article class="card-h reveal d2 group rounded-2xl overflow-hidden bg-zinc-100 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 hover:border-accent">
+        <div class="pf w-full h-36 cursor-zoom-in" role="button" tabindex="0" aria-label="Open Website ERP gallery" data-gallery="website_erp/website-erp-1.png|website_erp/website-erp-2.jpg|website_erp/website-erp-3.jpg|website_erp/website-erp-4.jpg|website_erp/website-erp-5.jpg">
+          <img src="website_erp/website-erp-1.png" alt="Website ERP — tampilan utama" loading="lazy">
+          <span class="absolute top-3 right-3 text-xs bg-black/60 text-white px-2.5 py-1 rounded-full">1 / 5</span>
+        </div>
+        <div class="p-6">
+          <div class="flex flex-wrap gap-2 mb-3">
+            <span class="text-xs bg-orange-50 dark:bg-zinc-800 text-accent border border-orange-200 dark:border-zinc-700 px-3 py-1 rounded-full">ERP</span>
+            <span class="text-xs bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 px-3 py-1 rounded-full">Laravel</span>
+            <span class="text-xs bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 px-3 py-1 rounded-full">MySQL</span>
+          </div>
+          <a href="projects.html">
+            <h3 class="font-display font-bold text-xl text-zinc-900 dark:text-white mb-1.5">Website ERP</h3>
+          </a>
+          <p class="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed" data-i18n="erp.d">Web-based ERP application: inventory, purchasing and sales modules, accounting reports, and role-based user management — built with Laravel and MySQL. Click the cover to browse the screenshots.</p>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ ABOUT ═══ -->
+<section id="about" class="py-24 bg-zinc-50 dark:bg-zinc-900/40">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="grid md:grid-cols-2 gap-16 items-center">
+
+      <div class="reveal order-2 md:order-1">
+        <div class="pf w-full aspect-square max-w-sm mx-auto rounded-3xl">
+          <img src="image/profile.jpeg" alt="Vikri Alva Pratama" loading="lazy">
+        </div>
+      </div>
+
+      <div class="order-1 md:order-2">
+        <p class="reveal text-xs font-medium text-accent tracking-widest uppercase mb-3" data-i18n="about.eyebrow">About me</p>
+        <h2 class="reveal d1 font-display font-bold text-4xl md:text-5xl text-zinc-900 dark:text-white leading-tight mb-6" data-i18n-html="about.title">A bit about<br>who I am</h2>
+        <p class="reveal d2 text-zinc-500 dark:text-zinc-400 leading-relaxed mb-4" data-i18n="about.p1">
+          I'm Vikri Alva Pratama, a freelance full stack developer based in Paris with 5 years of experience building web applications for startups, agencies, and scale-ups across Europe. I own products end to end — from database schema and API design all the way to polished user interfaces.
+        </p>
+        <p class="reveal d3 text-zinc-500 dark:text-zinc-400 leading-relaxed mb-8" data-i18n="about.p2">
+          I believe great software is invisible — it just works, at any scale. My code is typed, tested and built to last. When I'm not coding, you'll find me hiking or hunting for a good espresso.
+        </p>
+        <div class="reveal d4">
+          <p class="text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-widest mb-3" data-i18n="about.stack">Stack &amp; tools</p>
+          <div class="flex flex-wrap gap-2" role="list" aria-label="Skills">
+            <span role="listitem" class="stag text-sm bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 px-3.5 py-1.5 rounded-full hover:border-accent">Laravel</span>
+            <span role="listitem" class="stag text-sm bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 px-3.5 py-1.5 rounded-full hover:border-accent">PHP</span>
+            <span role="listitem" class="stag text-sm bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 px-3.5 py-1.5 rounded-full hover:border-accent">MySQL</span>
+            <span role="listitem" class="stag text-sm bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 px-3.5 py-1.5 rounded-full hover:border-accent">JavaScript</span>
+            <span role="listitem" class="stag text-sm bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 px-3.5 py-1.5 rounded-full hover:border-accent">React</span>
+            <span role="listitem" class="stag text-sm bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 px-3.5 py-1.5 rounded-full hover:border-accent">Node.js</span>
+            <span role="listitem" class="stag text-sm bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 px-3.5 py-1.5 rounded-full hover:border-accent">GitHub</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CONTACT ═══ -->
+<section id="contact" class="py-24">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="bg-zinc-900 dark:bg-zinc-800 rounded-3xl p-10 md:p-16 relative overflow-hidden">
+      <div class="absolute top-0 right-0 w-64 h-64 bg-accent/20 rounded-full blur-3xl pointer-events-none" aria-hidden="true"></div>
+      <div class="absolute bottom-0 left-0 w-40 h-40 bg-accent/10 rounded-full blur-2xl pointer-events-none" aria-hidden="true"></div>
+
+      <div class="relative z-10 grid md:grid-cols-2 gap-12 items-start">
+
+        <div>
+          <p class="reveal text-xs font-medium text-accent tracking-widest uppercase mb-3" data-i18n="ct.eyebrow">Get in touch</p>
+          <h2 class="reveal d1 font-display font-bold text-4xl md:text-5xl text-white leading-tight mb-5" data-i18n-html="ct.title">Let's work<br>together</h2>
+          <p class="reveal d2 text-zinc-400 leading-relaxed mb-8" data-i18n="ct.p">I'm open to full-stack missions, short or long-term. New product build, API development, performance rescue, or an extra pair of hands on your team — let's talk.</p>
+
+          <div class="reveal d3 flex flex-col gap-4">
+            <a href="mailto:vikrialvapratama28@gmail.com" class="group flex items-center gap-3 text-zinc-400 hover:text-white transition-colors">
+              <span class="w-9 h-9 flex items-center justify-center bg-zinc-800 rounded-lg group-hover:bg-accent/20 transition-colors shrink-0">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+              </span>
+              <span class="text-sm">vikrialvapratama28@gmail.com</span>
+            </a>
+            <a href="https://www.linkedin.com/in/vikri-alvapr-805775430" rel="noopener noreferrer" target="_blank" class="group flex items-center gap-3 text-zinc-400 hover:text-white transition-colors">
+              <span class="w-9 h-9 flex items-center justify-center bg-zinc-800 rounded-lg group-hover:bg-accent/20 transition-colors shrink-0">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+              </span>
+              <span class="text-sm">linkedin.com/in/vikri-alvapr-805775430</span>
+            </a>
+            <a href="https://github.com/Vikrialva" rel="noopener noreferrer" target="_blank" class="group flex items-center gap-3 text-zinc-400 hover:text-white transition-colors">
+              <span class="w-9 h-9 flex items-center justify-center bg-zinc-800 rounded-lg group-hover:bg-accent/20 transition-colors shrink-0">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+              </span>
+              <span class="text-sm">github.com/Vikrialva</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="reveal d2">
+          <form id="contact-form" novalidate>
+            <div class="flex flex-col gap-4">
+              <div class="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <label for="fname" class="block text-xs font-medium text-zinc-400 mb-1.5"><span data-i18n="form.name">Name</span> <span aria-hidden="true">*</span></label>
+                  <input type="text" id="fname" name="name" placeholder="Jane Smith" required autocomplete="name"
+                    class="w-full bg-zinc-800 border border-zinc-700 text-white text-sm rounded-xl px-4 py-3 placeholder-zinc-600 focus:outline-none focus:border-accent transition-colors">
+                </div>
+                <div>
+                  <label for="femail" class="block text-xs font-medium text-zinc-400 mb-1.5"><span data-i18n="form.email">Email</span> <span aria-hidden="true">*</span></label>
+                  <input type="email" id="femail" name="email" placeholder="jane@company.com" required autocomplete="email"
+                    class="w-full bg-zinc-800 border border-zinc-700 text-white text-sm rounded-xl px-4 py-3 placeholder-zinc-600 focus:outline-none focus:border-accent transition-colors">
+                </div>
+              </div>
+              <div>
+                <label for="fsubject" class="block text-xs font-medium text-zinc-400 mb-1.5" data-i18n="form.subject">Subject</label>
+                <input type="text" id="fsubject" name="subject" placeholder="Project inquiry" data-i18n-ph="ph.subject"
+                  class="w-full bg-zinc-800 border border-zinc-700 text-white text-sm rounded-xl px-4 py-3 placeholder-zinc-600 focus:outline-none focus:border-accent transition-colors">
+              </div>
+              <div>
+                <label for="fmessage" class="block text-xs font-medium text-zinc-400 mb-1.5"><span data-i18n="form.message">Message</span> <span aria-hidden="true">*</span></label>
+                <textarea id="fmessage" name="message" rows="4" placeholder="Tell me about your project..." data-i18n-ph="ph.message" required
+                  class="w-full bg-zinc-800 border border-zinc-700 text-white text-sm rounded-xl px-4 py-3 placeholder-zinc-600 focus:outline-none focus:border-accent transition-colors resize-none"></textarea>
+              </div>
+              <button type="submit" class="shimmer w-full bg-accent text-white font-display font-bold text-sm py-3.5 rounded-xl hover:bg-accent-light transition-colors disabled:opacity-60">
+                <span data-i18n="form.send">Send message →</span>
+              </button>
+              <p id="form-status" role="status" aria-live="polite" class="hidden text-sm"></p>
+            </div>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="border-t border-zinc-100 dark:border-zinc-900">
+  <div class="max-w-6xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+    <p class="text-sm text-zinc-400">© <span id="yr"></span> Vikri Alva Pratama. <span data-i18n="foot.rights">All rights reserved.</span> <br> <span data-i18n="foot.dev">Developed by</span> <a href="https://lbegey78.gumroad.com/" target="_blank" class="font-bold">Laurent Begey</a> • <span data-i18n="foot.dist">Distributed by</span> <a href="https://themewagon.com/" target="_blank" class="font-bold">ThemeWagon</a></p>
+    <p class="text-xs text-zinc-500"><span data-i18n="foot.built">Built with</span>
+      <a href="https://tailwindcss.com" rel="noopener noreferrer" target="_blank" class="hover:text-accent transition-colors">Tailwind CSS</a>
+      &amp;
+      <a href="https://alpinejs.dev" rel="noopener noreferrer" target="_blank" class="hover:text-accent transition-colors">Alpine.js</a>
+    </p>
+  </div>
+</footer>
+<!-- ═══ LIGHTBOX ═══ -->
+<div id="lightbox" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/90 p-4 sm:p-10" role="dialog" aria-modal="true" aria-label="Image viewer">
+  <button id="lb-close" type="button" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-accent text-white flex items-center justify-center transition-colors" aria-label="Close">
+    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+  </button>
+  <button id="lb-prev" type="button" class="absolute left-3 sm:left-6 w-11 h-11 rounded-full bg-white/10 hover:bg-accent text-white flex items-center justify-center transition-colors" aria-label="Previous image">
+    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+  </button>
+  <figure class="max-w-5xl w-full text-center select-none">
+    <img id="lb-img" src="" alt="" class="max-h-[80vh] w-auto max-w-full mx-auto rounded-xl shadow-2xl">
+    <figcaption id="lb-count" class="mt-3 text-sm text-zinc-400"></figcaption>
+  </figure>
+  <button id="lb-next" type="button" class="absolute right-3 sm:right-6 w-11 h-11 rounded-full bg-white/10 hover:bg-accent text-white flex items-center justify-center transition-colors" aria-label="Next image">
+    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+  </button>
+</div>
+
+<script>
+(function () {
+  var lb = document.getElementById('lightbox');
+  if (!lb) return;
+  var img = document.getElementById('lb-img');
+  var cnt = document.getElementById('lb-count');
+  var prev = document.getElementById('lb-prev');
+  var next = document.getElementById('lb-next');
+  var list = [], idx = 0;
+  function render() {
+    img.src = list[idx];
+    cnt.textContent = (idx + 1) + ' / ' + list.length;
+    var multi = list.length > 1;
+    prev.style.display = multi ? '' : 'none';
+    next.style.display = multi ? '' : 'none';
+  }
+  function openFrom(el) {
+    var arr = (el.getAttribute('data-gallery') || '').split('|').filter(Boolean);
+    if (!arr.length) return;
+    list = arr;
+    idx = parseInt(el.getAttribute('data-start') || '0', 10) || 0;
+    render();
+    lb.classList.remove('hidden');
+    lb.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+  }
+  function hide() {
+    lb.classList.add('hidden');
+    lb.classList.remove('flex');
+    document.body.style.overflow = '';
+    img.src = '';
+    list = [];
+  }
+  function step(d) {
+    if (!list.length) return;
+    idx = (idx + d + list.length) % list.length;
+    render();
+  }
+  document.addEventListener('click', function (e) {
+    var g = e.target.closest('[data-gallery]');
+    if (g) { openFrom(g); return; }
+    if (e.target.closest('#lb-prev')) { step(-1); return; }
+    if (e.target.closest('#lb-next')) { step(1); return; }
+    if (e.target === lb || e.target.closest('#lb-close')) hide();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      var t = e.target;
+      if (t && t.matches && t.matches('[data-gallery]')) { e.preventDefault(); openFrom(t); return; }
+    }
+    if (lb.classList.contains('hidden')) return;
+    if (e.key === 'Escape') hide();
+    else if (e.key === 'ArrowLeft') step(-1);
+    else if (e.key === 'ArrowRight') step(1);
+  });
+})();
+</script>
+
+<script>
+(function () {
+  var form = document.getElementById('contact-form');
+  if (!form) return;
+  var EMAIL = 'vikrialvapratama28@gmail.com';
+  var MSG = {
+    en: {
+      sending: 'Sending…',
+      ok: 'Message sent! I will get back to you soon.',
+      err: 'Something went wrong. Please email me directly at ' + EMAIL + '.'
+    },
+    id: {
+      sending: 'Mengirim…',
+      ok: 'Pesan terkirim! Saya akan segera membalas.',
+      err: 'Terjadi kesalahan. Silakan email langsung ke ' + EMAIL + '.'
+    }
+  };
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (!form.checkValidity()) { form.reportValidity(); return; }
+    var status = document.getElementById('form-status');
+    var btn = form.querySelector('button[type="submit"]');
+    var lang = (typeof getLang === 'function') ? getLang() : 'en';
+    var m = MSG[lang] || MSG.en;
+    status.className = 'text-sm text-zinc-400';
+    status.textContent = m.sending;
+    btn.disabled = true;
+    var els = form.elements;
+    fetch('https://formsubmit.co/ajax/' + EMAIL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({
+        name: els['name'].value.trim(),
+        email: els['email'].value.trim(),
+        subject: els['subject'].value.trim() || '(no subject)',
+        message: els['message'].value.trim(),
+        _subject: 'Portfolio contact — ' + els['name'].value.trim(),
+        _template: 'table',
+        _captcha: 'false'
+      })
+    })
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function () {
+        status.textContent = m.ok;
+        status.className = 'text-sm text-green-500';
+        form.reset();
+      })
+      .catch(function () {
+        status.textContent = m.err;
+        status.className = 'text-sm text-red-400';
+      })
+      .finally(function () { btn.disabled = false; });
+  });
+})();
+</script>
+
+<script>
+function app() {
+  return {
+    dark: false,
+    mm: false,
+    sc: false,
+    s: 'hero',
+
+    init() {
+      // dark mode
+      this.dark = localStorage.getItem('theme') === 'dark' ||
+        (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      this.$watch('dark', v => localStorage.setItem('theme', v ? 'dark' : 'light'));
+
+      // scroll
+      window.addEventListener('scroll', () => {
+        this.sc = window.scrollY > 20;
+        this.updateSection();
+      }, { passive: true });
+
+      // reveal
+      const io = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+      }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+      document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+      // year
+      document.getElementById('yr').textContent = new Date().getFullYear();
+    },
+
+    updateSection() {
+      const atBottom = (window.innerHeight + window.scrollY) >= document.body.scrollHeight - 60;
+      if (atBottom) { this.s = 'contact'; return; }
+      const ids = ['contact','about','work','services','hero'];
+      for (const id of ids) {
+        const el = document.getElementById(id);
+        if (el && window.scrollY >= el.offsetTop - 130) { this.s = id; return; }
+      }
+    }
+  }
+}
+</script>
+
+<script>
+(function () {
+  var I18N = {
+    en: {
+      'nav.services': 'Services', 'nav.work': 'Work', 'nav.about': 'About', 'nav.contact': 'Contact', 'nav.hire': 'Hire me',
+      'hero.avail': 'Available for work',
+      'hero.hi': 'Hi, I\'m <span class="text-accent">Vikri Alva Pratama</span>',
+      'hero.tagline': 'Freelance <strong class="font-medium text-zinc-700 dark:text-zinc-300">Full Stack Developer</strong>. I design, build and ship complete web applications — from database schema to pixel-perfect interface. Fast, scalable, maintainable.',
+      'hero.cta1': 'View my work', 'hero.cta2': 'Get in touch', 'hero.badge': '3+ Yrs Exp',
+      'svc.eyebrow': 'What I do', 'svc.title': 'Services',
+      'svc1.t': 'Frontend Development',
+      'svc1.d': 'Modern, responsive interfaces with React and JavaScript, styled with Tailwind CSS. Pixel-perfect, accessible and blazing fast — with clean, well-tested code.',
+      'svc2.t': 'Backend & APIs',
+      'svc2.d': 'Robust APIs and web applications built with PHP and Laravel. Authentication, background jobs, payment integration and solid database design with MySQL.',
+      'svc3.t': 'DevOps & Deployment',
+      'svc3.d': 'Ship with confidence: Docker containers, CI/CD pipelines, cloud deployment (Vercel, AWS) plus monitoring, logging and automated testing baked in from day one.',
+      'work.eyebrow': 'Portfolio', 'work.title': 'Selected work', 'work.all': 'All projects →',
+      'ws.gh': 'View on GitHub →',
+      'erp.d': 'Web-based ERP application: inventory, purchasing and sales modules, accounting reports, and role-based user management — built with Laravel and MySQL. Click the cover to browse the screenshots.',
+      'ws.d': 'Complete school website: profile, news & announcements, photo gallery and contact — built with Laravel and MySQL on a responsive Tailwind UI. Click the cover to browse the screenshots.',
+      'about.eyebrow': 'About me',
+      'about.title': 'A bit about<br>who I am',
+      'about.p1': 'I\'m Vikri Alva Pratama, a freelance full stack developer based in Paris with 5 years of experience building web applications for startups, agencies, and scale-ups across Europe. I own products end to end — from database schema and API design all the way to polished user interfaces.',
+      'about.p2': 'I believe great software is invisible — it just works, at any scale. My code is typed, tested and built to last. When I\'m not coding, you\'ll find me hiking or hunting for a good espresso.',
+      'about.stack': 'Stack & tools',
+      'ct.title': 'Let\'s work<br>together',
+      'ct.p': 'I\'m open to full-stack missions, short or long-term. New product build, API development, performance rescue, or an extra pair of hands on your team — let\'s talk.',
+      'form.name': 'Name', 'form.email': 'Email', 'form.subject': 'Subject', 'form.message': 'Message', 'form.send': 'Send message →',
+      'ph.subject': 'Project inquiry', 'ph.message': 'Tell me about your project...',
+      'foot.rights': 'All rights reserved.', 'foot.dev': 'Developed by', 'foot.dist': 'Distributed by', 'foot.built': 'Built with'
+    },
+    id: {
+      'nav.services': 'Layanan', 'nav.work': 'Karya', 'nav.about': 'Tentang', 'nav.contact': 'Kontak', 'nav.hire': 'Rekrut saya',
+      'hero.avail': 'Terbuka untuk kerja',
+      'hero.hi': 'Hai, saya <span class="text-accent">Vikri Alva Pratama</span>',
+      'hero.tagline': 'Freelancer <strong class="font-medium text-zinc-700 dark:text-zinc-300">Full Stack Developer</strong>. Saya merancang, membangun, dan meluncurkan aplikasi web lengkap — dari skema database hingga antarmuka yang rapi. Cepat, scalable, mudah dirawat.',
+      'hero.cta1': 'Lihat karya saya', 'hero.cta2': 'Hubungi saya', 'hero.badge': '3+ Thn Pengalaman',
+      'svc.eyebrow': 'Apa yang saya kerjakan', 'svc.title': 'Layanan',
+      'svc1.t': 'Pengembangan Frontend',
+      'svc1.d': 'Antarmuka modern dan responsif dengan React dan JavaScript, distyling dengan Tailwind CSS. Presisi piksel, aksesibel, dan sangat cepat — dengan kode yang bersih dan teruji dengan baik.',
+      'svc2.t': 'Backend & API',
+      'svc2.d': 'API dan aplikasi web yang tangguh dibangun dengan PHP dan Laravel. Autentikasi, background jobs, integrasi pembayaran, dan desain database yang solid dengan MySQL.',
+      'svc3.t': 'DevOps & Deployment',
+      'svc3.d': 'Rilis dengan percaya diri: container Docker, pipeline CI/CD, deployment cloud (Vercel, AWS) plus monitoring, logging, dan automated testing sejak hari pertama.',
+      'work.eyebrow': 'Portofolio', 'work.title': 'Karya terpilih', 'work.all': 'Semua proyek →',
+      'ws.gh': 'Lihat di GitHub →',
+      'erp.d': 'Aplikasi ERP berbasis web: modul inventaris, pembelian dan penjualan, laporan akuntansi, serta manajemen pengguna berbasis peran — dibangun dengan Laravel dan MySQL. Klik sampulnya untuk melihat tangkapan layar.',
+      'ws.d': 'Situs web sekolah lengkap: profil, berita & pengumuman, galeri foto, dan kontak — dibangun dengan Laravel dan MySQL, antarmuka responsif Tailwind. Klik sampulnya untuk melihat tangkapan layar.',
+      'about.eyebrow': 'Tentang saya',
+      'about.title': 'Sekilas<br>tentang saya',
+      'about.p1': 'Saya Vikri Alva Pratama, full stack developer freelance yang berbasis di Paris dengan pengalaman 5 tahun membangun aplikasi web untuk startup, agensi, dan scale-up di seluruh Eropa. Saya menggarap produk dari ujung ke ujung — dari skema database dan desain API hingga antarmuka yang mulus.',
+      'about.p2': 'Saya percaya software yang hebat itu tak terlihat — dia bekerja, di skala berapa pun. Kode saya ter-typing, teruji, dan dibangun untuk tahan lama. Saat tidak coding, saya suka hiking atau berburu espresso yang enak.',
+      'about.stack': 'Stack & alat',
+      'ct.title': 'Mari bekerja<br>sama',
+      'ct.p': 'Saya terbuka untuk misi full-stack, jangka pendek maupun panjang. Bangun produk baru, pengembangan API, perbaikan performa, atau tambahan tenaga di tim Anda — mari bicara.',
+      'form.name': 'Nama', 'form.email': 'Email', 'form.subject': 'Subjek', 'form.message': 'Pesan', 'form.send': 'Kirim pesan →',
+      'ph.subject': 'Pertanyaan proyek', 'ph.message': 'Ceritakan tentang proyek Anda...',
+      'foot.rights': 'Hak cipta dilindungi.', 'foot.dev': 'Dikembangkan oleh', 'foot.dist': 'Didistribusikan oleh', 'foot.built': 'Dibangun dengan'
+    }
+  };
+
+  window.getLang = function () { return localStorage.getItem('lang') === 'id' ? 'id' : 'en'; };
+
+  function apply() {
+    var d = I18N[window.getLang()];
+    document.querySelectorAll('[data-i18n]').forEach(function (el) {
+      var v = d[el.getAttribute('data-i18n')];
+      if (v != null) el.textContent = v;
+    });
+    document.querySelectorAll('[data-i18n-html]').forEach(function (el) {
+      var v = d[el.getAttribute('data-i18n-html')];
+      if (v != null) el.innerHTML = v;
+    });
+    document.querySelectorAll('[data-i18n-ph]').forEach(function (el) {
+      var v = d[el.getAttribute('data-i18n-ph')];
+      if (v != null) el.setAttribute('placeholder', v);
+    });
+    document.documentElement.setAttribute('lang', window.getLang());
+    document.querySelectorAll('[data-lang-toggle] [data-l]').forEach(function (el) {
+      el.classList.toggle('text-accent', el.getAttribute('data-l') === window.getLang());
+    });
+  }
+
+  window.setLang = function (lang) {
+    localStorage.setItem('lang', lang);
+    apply();
+    document.dispatchEvent(new CustomEvent('langchange', { detail: { lang: lang } }));
+  };
+
+  document.addEventListener('DOMContentLoaded', apply);
+})();
+</script>
+
+</body>
+</html>

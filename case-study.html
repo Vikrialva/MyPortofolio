@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en" x-data="{
+  dark: localStorage.getItem('theme')==='dark'||(!localStorage.getItem('theme')&&window.matchMedia('(prefers-color-scheme: dark)').matches),
+  scrolled: false,
+  mobileMenu: false,
+  progress: 0
+}" :class="{'dark':dark}" x-init="
+  $watch('dark', v => localStorage.setItem('theme', v ? 'dark' : 'light'));
+  window.addEventListener('scroll', () => {
+    scrolled = window.scrollY > 20;
+    progress = Math.min(100, Math.round((window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100));
+  }, { passive: true });
+" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="Novu — SaaS Dashboard full-stack rebuild case study by Vikri Alva Pratama. How a new MySQL schema, Laravel API and React frontend cut page loads by 60% and improved trial-to-paid conversion by 27%."/>
+  <meta name="author" content="Vikri Alva Pratama"/>
+  <meta property="og:title" content="Novu — SaaS Dashboard · Case Study by Vikri Alva Pratama"/>
+  <meta property="og:type" content="article"/>
+  <title>Novu — SaaS Dashboard · Case Study — Vikri Alva Pratama</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500&display=swap" rel="stylesheet"/>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { display: ['PT Sans','sans-serif'], body: ['DM Sans','sans-serif'] },
+          colors: { accent: '#FF6B2B', 'accent-light': '#FF8F5C' }
+        }
+      }
+    }
+  </script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;}
+    html{font-family:'DM Sans',sans-serif;}
+    h1,h2,h3,h4,h5,h6{font-family:'PT Sans',sans-serif;}
+    ::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:#FF6B2B;border-radius:99px;}
+    body{transition:background-color .3s,color .3s;}
+    body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:.4;}
+    .nav-link{position:relative;}
+    .nav-link::after{content:'';position:absolute;bottom:-2px;left:0;width:0;height:1.5px;background:currentColor;transition:width .25s cubic-bezier(.4,0,.2,1);}
+    .nav-link:hover::after{width:100%;}
+    .btn-primary{position:relative;overflow:hidden;}
+    .btn-primary::after{content:'';position:absolute;top:0;left:-100%;width:60%;height:100%;background:rgba(255,255,255,.18);transform:skewX(-20deg);transition:left .4s cubic-bezier(.4,0,.2,1);}
+    .btn-primary:hover::after{left:160%;}
+    [x-cloak]{display:none!important;}
+    .photo-frame{position:relative;overflow:hidden;background:#e4e4e7;}
+    .photo-frame img{width:100%;height:100%;object-fit:cover;display:block;}
+
+    /* Reading progress */
+    .progress-bar{position:fixed;top:0;left:0;height:3px;background:#FF6B2B;z-index:100;transition:width .1s linear;}
+
+    /* Reveal */
+    .reveal{opacity:0;transform:translateY(22px);transition:opacity .55s cubic-bezier(.4,0,.2,1),transform .55s cubic-bezier(.4,0,.2,1);}
+    .reveal.visible{opacity:1;transform:translateY(0);}
+    .d1{transition-delay:.07s}.d2{transition-delay:.14s}.d3{transition-delay:.21s}.d4{transition-delay:.28s}
+
+    /* Case study prose */
+    .prose-cs h2{font-family:'PT Sans',sans-serif;font-size:1.55rem;font-weight:700;margin:2.75rem 0 1rem;line-height:1.25;}
+    .prose-cs h3{font-family:'PT Sans',sans-serif;font-size:1.15rem;font-weight:700;margin:2rem 0 .6rem;line-height:1.3;color:#FF6B2B;}
+    .prose-cs p{margin:0 0 1.4rem;line-height:1.82;color:#52525b;}
+    .dark .prose-cs p{color:#a1a1aa;}
+    .prose-cs ul{margin:0 0 1.4rem 1.5rem;list-style:disc;}
+    .prose-cs li{margin-bottom:.45rem;line-height:1.7;color:#52525b;}
+    .dark .prose-cs li{color:#a1a1aa;}
+    .prose-cs blockquote{border-left:3px solid #FF6B2B;padding:.75rem 1.25rem;margin:0 0 1.8rem;background:#fff7f4;border-radius:0 8px 8px 0;}
+    .dark .prose-cs blockquote{background:#27272a;}
+    .prose-cs blockquote p{color:#52525b;font-style:italic;margin:0;}
+    .dark .prose-cs blockquote p{color:#a1a1aa;}
+    .prose-cs hr{border:none;border-top:1px solid #e4e4e7;margin:2.5rem 0;}
+    .dark .prose-cs hr{border-top-color:#27272a;}
+    .prose-cs a{color:#FF6B2B;text-decoration:underline;text-underline-offset:3px;}
+
+    /* Stat card */
+    .stat-card{border-left:3px solid #FF6B2B;}
+
+    /* Image caption */
+    .img-caption{font-size:.8rem;color:#a1a1aa;text-align:center;margin-top:.6rem;}
+
+    /* Step badge */
+    .step-badge{width:2rem;height:2rem;min-width:2rem;border-radius:50%;background:#FF6B2B;color:#fff;font-family:'PT Sans',sans-serif;font-weight:700;font-size:.85rem;display:flex;align-items:center;justify-content:center;}
+
+    /* card hover */
+    .card-h{transition:transform .28s cubic-bezier(.4,0,.2,1),border-color .18s;}
+    .card-h:hover{transform:translateY(-4px);}
+  </style>
+</head>
+<body class="bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-body antialiased">
+
+  <!-- Reading progress bar -->
+  <div class="progress-bar" :style="`width:${progress}%`" role="progressbar" :aria-valuenow="progress" aria-valuemin="0" aria-valuemax="100" aria-label="Reading progress"></div>
+
+  <!-- ═══ NAV ═══ -->
+  <header class="fixed top-0.5 left-0 right-0 z-50 transition-all duration-300"
+    :class="scrolled ? 'bg-white/90 dark:bg-zinc-950/90 backdrop-blur-md shadow-sm shadow-black/5' : 'bg-transparent'">
+    <nav class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between" aria-label="Main navigation">
+      <a href="index.html" class="font-display font-bold text-xl tracking-tight z-10">
+        <span class="text-zinc-900 dark:text-white">vikri alva </span><span class="text-accent">pratama</span>
+      </a>
+      <ul class="hidden md:flex items-center gap-8 text-sm font-medium" role="list">
+        <li><a href="index.html#services" class="nav-link text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors" data-i18n="nav.services">Services</a></li>
+        <li><a href="projects.html" class="nav-link text-accent font-medium" data-i18n="nav.work">Work</a></li>
+        <li><a href="index.html#about" class="nav-link text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors" data-i18n="nav.about">About</a></li>
+        <li><a href="blog.html" class="nav-link text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors" data-i18n="nav.blog">Blog</a></li>
+        <li><a href="index.html#contact" class="nav-link text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors" data-i18n="nav.contact">Contact</a></li>
+      </ul>
+      <div class="flex items-center gap-3">
+        <!-- lang toggle -->
+        <button data-lang-toggle onclick="setLang(getLang()==='en'?'id':'en')" class="h-9 px-3 flex items-center justify-center rounded-full border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-xs font-bold tracking-wide" aria-label="Ganti bahasa / Switch language">
+          <span data-l="id">ID</span><span class="opacity-30 mx-0.5">/</span><span data-l="en">ENG</span>
+        </button>
+        <button @click="dark=!dark"
+          class="w-9 h-9 flex items-center justify-center rounded-full border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+          :aria-label="dark ? 'Light mode' : 'Dark mode'">
+          <svg x-show="!dark" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+          <svg x-show="dark" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"/></svg>
+        </button>
+        <a href="index.html#contact" class="hidden md:inline-flex items-center gap-2 btn-primary bg-accent text-white text-sm font-medium px-5 py-2 rounded-full hover:bg-accent-light transition-colors"><span data-i18n="nav.hire">Hire me</span> →</a>
+        <button @click="mobileMenu=!mobileMenu" class="md:hidden w-9 h-9 flex items-center justify-center rounded-full border border-zinc-200 dark:border-zinc-800" aria-label="Toggle menu">
+          <svg x-show="!mobileMenu" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+          <svg x-show="mobileMenu" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+    </nav>
+    <div x-show="mobileMenu" x-cloak
+      x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0"
+      x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-2"
+      class="md:hidden bg-white dark:bg-zinc-950 border-t border-zinc-100 dark:border-zinc-900">
+      <ul class="flex flex-col px-6 py-4 gap-4 text-sm font-medium" role="list">
+        <li><a href="index.html#services" @click="mobileMenu=false" class="block text-zinc-700 dark:text-zinc-300" data-i18n="nav.services">Services</a></li>
+        <li><a href="projects.html" @click="mobileMenu=false" class="block text-accent font-medium" data-i18n="nav.work">Work</a></li>
+        <li><a href="index.html#about" @click="mobileMenu=false" class="block text-zinc-700 dark:text-zinc-300" data-i18n="nav.about">About</a></li>
+        <li><a href="blog.html" @click="mobileMenu=false" class="block text-zinc-700 dark:text-zinc-300" data-i18n="nav.blog">Blog</a></li>
+        <li><a href="index.html#contact" @click="mobileMenu=false" class="block text-zinc-700 dark:text-zinc-300" data-i18n="nav.contact">Contact</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ═══ CASE STUDY HEADER ═══ -->
+    <article>
+      <header class="pt-32 pb-10 max-w-4xl mx-auto px-6">
+
+        <!-- Back link -->
+        <a href="projects.html" class="inline-flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400 hover:text-accent transition-colors mb-8">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16l-4-4m0 0l4-4m-4 4h18"/></svg>
+          <span data-i18n="cs.back">Back to projects</span>
+        </a>
+
+        <!-- Tags + date -->
+        <div class="flex flex-wrap items-center gap-3 mb-6">
+          <span class="text-xs bg-orange-50 dark:bg-zinc-800 text-accent border border-orange-200 dark:border-zinc-700 px-2.5 py-1 rounded-full">SaaS</span>
+            <span class="text-xs bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 px-2.5 py-1 rounded-full">Laravel</span>
+            <span class="text-xs bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 px-2.5 py-1 rounded-full">React</span>
+          <span class="text-xs text-zinc-400 ml-1" data-i18n="cs.date">2025 · 6 weeks</span>
+        </div>
+
+        <h1 class="reveal font-display font-bold text-4xl md:text-5xl lg:text-6xl text-zinc-900 dark:text-white leading-tight mb-6" data-i18n="cs.title">
+          Novu — SaaS Dashboard Rebuild
+        </h1>
+
+        <p class="reveal d1 text-xl text-zinc-500 dark:text-zinc-400 leading-relaxed mb-10 max-w-2xl" data-i18n="cs.lede">
+          A full-stack rebuild of a B2B notification management platform — new database schema, real-time API, and a fast dashboard frontend. Page loads 60% faster, trial-to-paid conversion up 27%.
+        </p>
+
+        <!-- Meta row -->
+        <div class="reveal d2 grid grid-cols-2 md:grid-cols-4 gap-4 py-8 border-t border-b border-zinc-100 dark:border-zinc-900">
+          <div>
+            <p class="text-xs text-zinc-400 uppercase tracking-widest mb-1" data-i18n="meta.client">Client</p>
+            <p class="font-medium text-zinc-900 dark:text-white text-sm">Novu Inc.</p>
+          </div>
+          <div>
+            <p class="text-xs text-zinc-400 uppercase tracking-widest mb-1" data-i18n="meta.role">Role</p>
+            <p class="font-medium text-zinc-900 dark:text-white text-sm">Full Stack Developer</p>
+          </div>
+          <div>
+            <p class="text-xs text-zinc-400 uppercase tracking-widest mb-1" data-i18n="meta.timeline">Timeline</p>
+            <p class="font-medium text-zinc-900 dark:text-white text-sm">Jan – Feb 2025</p>
+          </div>
+          <div>
+            <p class="text-xs text-zinc-400 uppercase tracking-widest mb-1" data-i18n="meta.stack">Stack</p>
+            <p class="font-medium text-zinc-900 dark:text-white text-sm">Laravel, React, MySQL</p>
+          </div>
+        </div>
+      </header>
+
+      <!-- ═══ HERO IMAGE ═══ -->
+      <div class="max-w-6xl mx-auto px-6 mb-16">
+        <div class="reveal photo-frame w-full h-72 md:h-[480px] rounded-3xl">
+          <img src="https://images.unsplash.com/photo-1551650975-87deedd944c3?w=1400&q=80" alt="Novu — SaaS Dashboard full-stack rebuild hero" loading="eager"/>
+        </div>
+      </div>
+
+      <!-- ═══ RESULTS BANNER ═══ -->
+      <div class="max-w-4xl mx-auto px-6 mb-16">
+        <div class="reveal grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="stat-card bg-zinc-50 dark:bg-zinc-900 rounded-2xl p-5 pl-6">
+            <p class="font-display font-bold text-3xl text-zinc-900 dark:text-white">−60%</p>
+            <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1 leading-snug" data-i18n="stat1">Page load time (p95)</p>
+          </div>
+          <div class="stat-card bg-zinc-50 dark:bg-zinc-900 rounded-2xl p-5 pl-6">
+            <p class="font-display font-bold text-3xl text-accent">+27%</p>
+            <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1 leading-snug" data-i18n="stat2">Trial-to-paid conversion</p>
+          </div>
+          <div class="stat-card bg-zinc-50 dark:bg-zinc-900 rounded-2xl p-5 pl-6">
+            <p class="font-display font-bold text-3xl text-zinc-900 dark:text-white">−70%</p>
+            <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1 leading-snug" data-i18n="stat3">API response time (avg)</p>
+          </div>
+          <div class="stat-card bg-zinc-50 dark:bg-zinc-900 rounded-2xl p-5 pl-6">
+            <p class="font-display font-bold text-3xl text-zinc-900 dark:text-white">99.98%</p>
+            <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1 leading-snug" data-i18n="stat4">Uptime since launch</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ ARTICLE BODY ═══ -->
+      <div class="max-w-3xl mx-auto px-6 pb-4 prose-cs">
+
+        <h2 data-i18n="b.h1">The brief</h2>
+        <p data-i18n="b.p1">Novu is a B2B notification infrastructure platform — it lets developers route, manage, and monitor notifications across email, SMS, push, and in-app channels. The backend was a two-year-old PHP monolith with no clear module boundaries, the dashboard was server-rendered jQuery, and every new feature took longer to ship than the last. By early 2025, deploys were weekly at best, page loads regularly exceeded four seconds, and churn in the 14-day trial window was climbing.</p>
+        <p data-i18n="b.p2">My mandate was simple: rebuild the platform end to end without freezing feature work. The budget was fixed and we had six weeks to cut over.</p>
+
+        <blockquote>
+          <p data-i18n="b.q">"We're losing users in the first 20 minutes. They sign up, see the dashboard, and just bounce. The product does exactly what they need — they just can't get to it fast enough."</p>
+        </blockquote>
+
+        <h2 data-i18n="b.h2">Discovery &amp; technical audit</h2>
+        <h3 data-i18n="b.h2a">Audit of the existing system</h3>
+        <p data-i18n="b.p3">I spent the first week mapping the existing architecture and instrumenting everything. The findings were brutal but predictable:</p>
+        <ul data-i18n-html="b.list1">
+          <li>The dashboard made 47 API calls on first load — many duplicated or sequential when they could be parallel</li>
+          <li>No database indexes on the three hottest query paths; the notification log query did a full table scan across 40M rows</li>
+          <li>Business logic leaked into controllers and templates alike — zero test coverage anywhere</li>
+          <li>Trial users specifically wanted a "get your first notification live" path, not a feature overview</li>
+        </ul>
+
+        <h3 data-i18n="b.h2b">Profiling</h3>
+        <p data-i18n="b.p4">I profiled the slowest user journeys with distributed tracing and found that 80% of dashboard latency came from N+1 queries and unpaginated list endpoints. This told me exactly where the rewrite would pay for itself fastest.</p>
+
+      </div>
+
+      <!-- Full-width image -->
+      <div class="max-w-5xl mx-auto px-6 mb-4">
+        <div class="reveal photo-frame w-full h-56 md:h-80 rounded-2xl">
+          <img src="https://images.unsplash.com/photo-1581472723648-909f4851d4ae?w=1200&q=80" alt="Architecture audit — data flow and hot paths mapped" loading="lazy"/>
+        </div>
+        <p class="img-caption" data-i18n="cap1">Existing architecture with latency hot spots annotated during the audit phase.</p>
+      </div>
+
+      <div class="max-w-3xl mx-auto px-6 pb-4 prose-cs">
+
+        <h2 data-i18n="strat.h">Technical strategy</h2>
+        <p data-i18n="strat.p">Based on the audit, I built the rebuild plan around three principles:</p>
+
+      </div>
+
+      <!-- 3-column principles -->
+      <div class="max-w-5xl mx-auto px-6 mb-12">
+        <div class="reveal grid md:grid-cols-3 gap-5">
+          <div class="bg-zinc-50 dark:bg-zinc-900 rounded-2xl p-7 border border-zinc-100 dark:border-zinc-800">
+            <div class="w-10 h-10 bg-orange-50 dark:bg-zinc-800 rounded-xl flex items-center justify-center mb-4">
+              <svg class="w-5 h-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            </div>
+            <h3 class="font-display font-bold text-zinc-900 dark:text-white mb-2" style="font-size:1rem;margin:0 0 .5rem;color:inherit;" data-i18n="pr1.t">Strangler, not big bang</h3>
+            <p class="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed" style="margin:0;color:inherit;" data-i18n="pr1.d">New Laravel services sat behind a proxy alongside the legacy monolith. Routes migrated one by one — no risky cutover weekend.</p>
+          </div>
+          <div class="bg-zinc-50 dark:bg-zinc-900 rounded-2xl p-7 border border-zinc-100 dark:border-zinc-800">
+            <div class="w-10 h-10 bg-orange-50 dark:bg-zinc-800 rounded-xl flex items-center justify-center mb-4">
+              <svg class="w-5 h-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2 1 3 3 3h10c2 0 3-1 3-3V7c0-2-1-3-3-3H7C5 4 4 5 4 7zm2 4h12M8 15h4"/></svg>
+            </div>
+            <h3 class="font-display font-bold text-zinc-900 dark:text-white mb-2" style="font-size:1rem;margin:0 0 .5rem;color:inherit;" data-i18n="pr2.t">Schema-first</h3>
+            <p class="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed" style="margin:0;color:inherit;" data-i18n="pr2.d">A clean MySQL schema with proper indexes and constraints designed before any API code. Migrations versioned and reversible.</p>
+          </div>
+          <div class="bg-zinc-50 dark:bg-zinc-900 rounded-2xl p-7 border border-zinc-100 dark:border-zinc-800">
+            <div class="w-10 h-10 bg-orange-50 dark:bg-zinc-800 rounded-xl flex items-center justify-center mb-4">
+              <svg class="w-5 h-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
+            </div>
+            <h3 class="font-display font-bold text-zinc-900 dark:text-white mb-2" style="font-size:1rem;margin:0 0 .5rem;color:inherit;" data-i18n="pr3.t">Tested from day one</h3>
+            <p class="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed" style="margin:0;color:inherit;" data-i18n="pr3.d">PHPUnit unit + Playwright e2e tests in CI for every merged PR. Coverage gates on the new codebase: minimum 85% before anything ships.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="max-w-3xl mx-auto px-6 pb-4 prose-cs">
+
+        <h2 data-i18n="proc.h">Process</h2>
+        <h3 data-i18n="proc.w1">Week 1 · Schema &amp; data migration</h3>
+        <p data-i18n="proc.p">I modelled the new MySQL schema around access patterns rather than entities: composite indexes for every dashboard query, JSON columns only where truly schemaless data was needed, and partitioning on the notification log table by month. A dual-write phase kept legacy and new databases in sync while queued backfill jobs migrated 40M rows with zero downtime.</p>
+
+      </div>
+
+      <!-- Process steps -->
+      <div class="max-w-4xl mx-auto px-6 mb-12">
+        <div class="reveal space-y-4">
+          <!-- Step -->
+          <div class="flex gap-5 bg-zinc-50 dark:bg-zinc-900 rounded-2xl p-6 border border-zinc-100 dark:border-zinc-800">
+            <div class="step-badge shrink-0 mt-0.5">1</div>
+            <div>
+              <p class="font-display font-bold text-zinc-900 dark:text-white mb-1" data-i18n="step1.t">Schema design &amp; zero-downtime migration</p>
+              <p class="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed" data-i18n="step1.d">New MySQL schema modelled on access patterns. Dual-write + queued backfill jobs moved 40M rows with zero downtime. Hot queries went from 2.4s to 40ms.</p>
+            </div>
+          </div>
+          <div class="flex gap-5 bg-zinc-50 dark:bg-zinc-900 rounded-2xl p-6 border border-zinc-100 dark:border-zinc-800">
+            <div class="step-badge shrink-0 mt-0.5">2</div>
+            <div>
+              <p class="font-display font-bold text-zinc-900 dark:text-white mb-1" data-i18n="step2.t">Laravel API &amp; strangler migration</p>
+              <p class="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed" data-i18n="step2.d">Strictly-typed PHP 8.3 with Laravel: modular monolith boundaries, Form Request validation and OpenAPI docs. 34 endpoints migrated behind a proxy, one route at a time.</p>
+            </div>
+          </div>
+          <div class="flex gap-5 bg-zinc-50 dark:bg-zinc-900 rounded-2xl p-6 border border-zinc-100 dark:border-zinc-800">
+            <div class="step-badge shrink-0 mt-0.5">3</div>
+            <div>
+              <p class="font-display font-bold text-zinc-900 dark:text-white mb-1" data-i18n="step3.t">React dashboard frontend</p>
+              <p class="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed" data-i18n="step3.d">React SPA served by Laravel for instant navigation. React Query caching cut API calls from 47 to 6 on initial load. Laravel Echo + WebSockets for real-time logs.</p>
+            </div>
+          </div>
+          <div class="flex gap-5 bg-zinc-50 dark:bg-zinc-900 rounded-2xl p-6 border border-zinc-100 dark:border-zinc-800">
+            <div class="step-badge shrink-0 mt-0.5">4</div>
+            <div>
+              <p class="font-display font-bold text-zinc-900 dark:text-white mb-1" data-i18n="step4.t">Testing &amp; CI/CD</p>
+              <p class="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed" data-i18n="step4.d">Pest unit tests, Playwright e2e flows for the critical paths, GitHub Actions pipeline with preview environments per PR. Coverage gate at 85%.</p>
+            </div>
+          </div>
+          <div class="flex gap-5 bg-zinc-50 dark:bg-zinc-900 rounded-2xl p-6 border border-zinc-100 dark:border-zinc-800">
+            <div class="step-badge shrink-0 mt-0.5">5</div>
+            <div>
+              <p class="font-display font-bold text-zinc-900 dark:text-white mb-1" data-i18n="step5.t">Observability &amp; handover</p>
+              <p class="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed" data-i18n="step5.d">Structured logging, Grafana dashboards and alerting on p95 latency and error rates. Pairing sessions with the in-house team for a smooth handover.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Second full-width image -->
+      <div class="max-w-5xl mx-auto px-6 mb-4">
+        <div class="reveal photo-frame w-full h-56 md:h-80 rounded-2xl">
+          <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&q=80" alt="New Laravel + React dashboard — real-time logs and analytics" loading="lazy"/>
+        </div>
+        <p class="img-caption" data-i18n="cap2">Final dashboard: server-rendered panels, real-time WebSocket log stream, and the workflow builder.</p>
+      </div>
+
+      <!-- Before / After split -->
+      <div class="max-w-5xl mx-auto px-6 mb-12">
+        <div class="reveal grid md:grid-cols-2 gap-4">
+          <div>
+            <div class="photo-frame w-full h-52 rounded-2xl">
+              <img src="https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=700&q=80" alt="Before — original dashboard" loading="lazy"/>
+            </div>
+            <p class="img-caption mt-2" data-i18n="beforeCap">Before — legacy jQuery dashboard, 4.1s load, 47 API calls</p>
+          </div>
+          <div>
+            <div class="photo-frame w-full h-52 rounded-2xl">
+              <img src="https://images.unsplash.com/photo-1551650975-87deedd944c3?w=700&q=80" alt="After — rebuilt dashboard" loading="lazy"/>
+            </div>
+            <p class="img-caption mt-2" data-i18n="afterCap">After — Laravel + React dashboard, 1.3s LCP, 6 API calls, real-time updates</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="max-w-3xl mx-auto px-6 pb-16 prose-cs">
+
+        <h2 data-i18n="dec.h">Key technical decisions</h2>
+        <h3 data-i18n="dec1.h">Partitioning the notification log</h3>
+        <p data-i18n="dec1.p">The log table grew by ~2M rows a week and was the single biggest latency source. I partitioned it monthly in MySQL and added covering indexes for the three dashboard query shapes. Combined with keyset pagination replacing OFFSET queries, p95 response time dropped from 2.4s to under 200ms — without touching application code.</p>
+
+        <h3 data-i18n="dec2.h">Real-time logs over WebSocket</h3>
+        <p data-i18n="dec2.p">Previously the dashboard polled the notification log every 10 seconds — 6 requests per minute per open tab. I replaced this with a Redis pub/sub layer feeding Laravel Echo over WebSockets. Users now see events within 100ms of them firing, and backend load from dashboard traffic dropped 90%.</p>
+
+        <h3 data-i18n="dec3.h">SSR first paint + React Query</h3>
+        <p data-i18n="dec3.p">Static panels (stats, channel health) are server-rendered by Laravel with the initial HTML; interactive panels hydrate on demand through a cached React Query layer with optimistic mutations. First load went from 47 API calls to 6, and LCP from 4.1s to 1.3s on mid-range hardware.</p>
+
+        <h2 data-i18n="res.h">Results</h2>
+        <p data-i18n="res.p">The rebuild shipped in week 6, exactly on schedule. Metrics were tracked over the following 6 weeks post-launch compared to the same prior period.</p>
+        <ul data-i18n-html="res.list">
+          <li><strong>Page load time (p95):</strong> 4.1s → 1.6s (−60%)</li>
+          <li><strong>Average API response time:</strong> −70%</li>
+          <li><strong>Trial-to-paid conversion rate:</strong> +27%</li>
+          <li><strong>Onboarding completion (first notification live):</strong> 21% → 68%</li>
+          <li><strong>Deploys per week:</strong> 1 → 12 (CI/CD pipeline)</li>
+          <li><strong>Uptime since launch:</strong> 99.98%</li>
+        </ul>
+
+        <blockquote>
+          <p data-i18n="res.q">"Vikri Alva Pratama rebuilt our platform end to end while we kept shipping features. Six weeks later everything is faster, deploys take minutes instead of days, and conversion is up 27%. Exceptionally thorough process and a pleasure to work with."</p>
+        </blockquote>
+
+        <h2 data-i18n="refl.h">Reflections</h2>
+        <p data-i18n="refl.p1">The biggest lesson from this project: most "slow product" complaints are really architecture complaints. The frontend was blamed for years, but 80% of the latency lived in N+1 queries and missing indexes. Measuring before rewriting meant we fixed the right things first.</p>
+        <p data-i18n="refl.p2">If I were to do it again, I'd push harder for a longer discovery phase. Six weeks is tight for a full-stack rebuild, and we made two schema decisions based on incomplete access-pattern data that needed revision in month two. The strangler approach absorbed both changes safely — but another week of profiling up front would have caught them earlier.</p>
+
+        <hr/>
+        <p><em data-i18n-html="outro">Interested in a similar engagement? <a href="index.html#contact">Get in touch</a> — I'm available for new projects from Q2 2025.</em></p>
+
+      </div>
+    </article>
+
+    <!-- ═══ MORE PROJECTS ═══ -->
+    <section class="bg-zinc-50 dark:bg-zinc-900/50 py-16">
+      <div class="max-w-6xl mx-auto px-6">
+        <div class="flex items-center justify-between mb-8">
+          <h2 class="font-display font-bold text-2xl text-zinc-900 dark:text-white" data-i18n="more.h">More projects</h2>
+          <a href="projects.html" class="text-sm font-medium text-accent nav-link hidden md:block" data-i18n="more.all">View all →</a>
+        </div>
+        <div class="grid md:grid-cols-3 gap-6">
+
+          <article class="reveal card-h group bg-white dark:bg-zinc-900 rounded-2xl overflow-hidden border border-zinc-100 dark:border-zinc-800 hover:border-accent transition-colors">
+            <div class="photo-frame w-full h-44">
+              <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=700&q=80" alt="Finlo — Fintech App" loading="lazy"/>
+            </div>
+            <div class="p-5">
+              <div class="flex gap-2 mb-2">
+                <span class="text-xs bg-orange-50 dark:bg-zinc-800 text-accent border border-orange-200 dark:border-zinc-700 px-2.5 py-1 rounded-full">API & Backend</span>
+              </div>
+              <a href="#">
+                <h3 class="font-display font-bold text-base text-zinc-900 dark:text-white mb-2 group-hover:text-accent transition-colors">Finlo — Fintech App</h3>
+              </a>
+              <a href="#" class="text-sm font-medium text-accent nav-link" data-i18n="card.view">View project →</a>
+            </div>
+          </article>
+
+          <article class="reveal card-h group bg-white dark:bg-zinc-900 rounded-2xl overflow-hidden border border-zinc-100 dark:border-zinc-800 hover:border-accent transition-colors">
+            <div class="photo-frame w-full h-44">
+              <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=700&q=80" alt="Orea — Creative Agency" loading="lazy"/>
+            </div>
+            <div class="p-5">
+              <div class="flex gap-2 mb-2">
+                <span class="text-xs bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 px-2.5 py-1 rounded-full">Web App</span>
+              </div>
+              <a href="#">
+                <h3 class="font-display font-bold text-base text-zinc-900 dark:text-white mb-2 group-hover:text-accent transition-colors">Orea — Creative Agency</h3>
+              </a>
+              <a href="#" class="text-sm font-medium text-accent nav-link" data-i18n="card.view">View project →</a>
+            </div>
+          </article>
+
+          <article class="reveal card-h group bg-white dark:bg-zinc-900 rounded-2xl overflow-hidden border border-zinc-100 dark:border-zinc-800 hover:border-accent transition-colors">
+            <div class="photo-frame w-full h-44">
+              <img src="https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=700&q=80" alt="Bloom — E-commerce" loading="lazy"/>
+            </div>
+            <div class="p-5">
+              <div class="flex gap-2 mb-2">
+                <span class="text-xs bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 px-2.5 py-1 rounded-full">E-commerce</span>
+              </div>
+              <a href="#">
+                <h3 class="font-display font-bold text-base text-zinc-900 dark:text-white mb-2 group-hover:text-accent transition-colors">Bloom — E-commerce</h3>
+              </a>
+              <a href="#" class="text-sm font-medium text-accent nav-link" data-i18n="card.view">View project →</a>
+            </div>
+          </article>
+
+        </div>
+        <div class="text-center mt-8 md:hidden">
+          <a href="projects.html" class="text-sm font-medium text-accent" data-i18n="more.allm">View all projects →</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ CTA ═══ -->
+    <section class="py-24">
+      <div class="max-w-6xl mx-auto px-6">
+        <div class="bg-zinc-900 dark:bg-zinc-800 rounded-3xl p-10 md:p-14 text-center relative overflow-hidden">
+          <div class="absolute top-0 right-0 w-64 h-64 bg-accent/20 rounded-full blur-3xl pointer-events-none" aria-hidden="true"></div>
+          <div class="absolute bottom-0 left-0 w-40 h-40 bg-accent/10 rounded-full blur-2xl pointer-events-none" aria-hidden="true"></div>
+          <div class="relative z-10">
+            <p class="text-xs font-medium text-accent tracking-widest uppercase mb-4" data-i18n="cta.eyebrow">Ready to start?</p>
+            <h2 class="font-display font-bold text-3xl md:text-4xl text-white mb-4" data-i18n="cta.title">Got a similar project?</h2>
+            <p class="text-zinc-400 max-w-md mx-auto mb-8" data-i18n="cta.p">I'm available for new projects. Tell me about what you're building and let's see if we're a good fit.</p>
+            <a href="index.html#contact" class="inline-flex items-center gap-2 btn-primary bg-accent text-white font-medium px-8 py-3.5 rounded-full hover:bg-accent-light transition-colors">
+              <span data-i18n="cta.btn">Start a project</span> →
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="border-t border-zinc-100 dark:border-zinc-900">
+    <div class="max-w-6xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <p class="text-sm text-zinc-400">© <span id="yr"></span> Vikri Alva Pratama. <span data-i18n="foot.rights">All rights reserved.</span> <br> <span data-i18n="foot.dev">Developed by</span> <a href="https://lbegey78.gumroad.com/" target="_blank" class="font-bold">Laurent Begey</a> • <span data-i18n="foot.dist">Distributed by</span> <a href="https://themewagon.com/" target="_blank" class="font-bold">ThemeWagon</a></p>
+      <p class="text-xs text-zinc-500"><span data-i18n="foot.built">Built with</span> <a href="https://tailwindcss.com" class="hover:text-zinc-900 dark:hover:text-white transition-colors" rel="noopener noreferrer" target="_blank">Tailwind CSS</a> &amp; <a href="https://alpinejs.dev" class="hover:text-zinc-900 dark:hover:text-white transition-colors" rel="noopener noreferrer" target="_blank">Alpine.js</a></p>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('year') && (document.getElementById('year').textContent = new Date().getFullYear());
+
+    // Reveal on scroll
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
+      });
+    }, { threshold: .08, rootMargin: '0px 0px -30px 0px' });
+    document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+  </script>
+
+  <script>
+  (function () {
+    var I18N = {
+      en: {
+        'nav.services': 'Services', 'nav.work': 'Work', 'nav.about': 'About', 'nav.blog': 'Blog', 'nav.contact': 'Contact', 'nav.hire': 'Hire me',
+        'cs.back': 'Back to projects', 'cs.date': '2025 · 6 weeks',
+        'cs.title': 'Novu — SaaS Dashboard Rebuild',
+        'cs.lede': 'A full-stack rebuild of a B2B notification management platform — new database schema, real-time API, and a fast dashboard frontend. Page loads 60% faster, trial-to-paid conversion up 27%.',
+        'meta.client': 'Client', 'meta.role': 'Role', 'meta.timeline': 'Timeline', 'meta.stack': 'Stack',
+        'stat1': 'Page load time (p95)', 'stat2': 'Trial-to-paid conversion', 'stat3': 'API response time (avg)', 'stat4': 'Uptime since launch',
+        'b.h1': 'The brief',
+        'b.p1': 'Novu is a B2B notification infrastructure platform — it lets developers route, manage, and monitor notifications across email, SMS, push, and in-app channels. The backend was a two-year-old PHP monolith with no clear module boundaries, the dashboard was server-rendered jQuery, and every new feature took longer to ship than the last. By early 2025, deploys were weekly at best, page loads regularly exceeded four seconds, and churn in the 14-day trial window was climbing.',
+        'b.p2': 'My mandate was simple: rebuild the platform end to end without freezing feature work. The budget was fixed and we had six weeks to cut over.',
+        'b.q': '"We\'re losing users in the first 20 minutes. They sign up, see the dashboard, and just bounce. The product does exactly what they need — they just can\'t get to it fast enough."',
+        'b.h2': 'Discovery & technical audit',
+        'b.h2a': 'Audit of the existing system',
+        'b.p3': 'I spent the first week mapping the existing architecture and instrumenting everything. The findings were brutal but predictable:',
+        'b.list1': '<li>The dashboard made 47 API calls on first load — many duplicated or sequential when they could be parallel</li><li>No database indexes on the three hottest query paths; the notification log query did a full table scan across 40M rows</li><li>Business logic leaked into controllers and templates alike — zero test coverage anywhere</li><li>Trial users specifically wanted a "get your first notification live" path, not a feature overview</li>',
+        'b.h2b': 'Profiling',
+        'b.p4': 'I profiled the slowest user journeys with distributed tracing and found that 80% of dashboard latency came from N+1 queries and unpaginated list endpoints. This told me exactly where the rewrite would pay for itself fastest.',
+        'cap1': 'Existing architecture with latency hot spots annotated during the audit phase.',
+        'strat.h': 'Technical strategy',
+        'strat.p': 'Based on the audit, I built the rebuild plan around three principles:',
+        'pr1.t': 'Strangler, not big bang',
+        'pr1.d': 'New Laravel services sat behind a proxy alongside the legacy monolith. Routes migrated one by one — no risky cutover weekend.',
+        'pr2.t': 'Schema-first',
+        'pr2.d': 'A clean MySQL schema with proper indexes and constraints designed before any API code. Migrations versioned and reversible.',
+        'pr3.t': 'Tested from day one',
+        'pr3.d': 'PHPUnit unit + Playwright e2e tests in CI for every merged PR. Coverage gates on the new codebase: minimum 85% before anything ships.',
+        'proc.h': 'Process',
+        'proc.w1': 'Week 1 · Schema & data migration',
+        'proc.p': 'I modelled the new MySQL schema around access patterns rather than entities: composite indexes for every dashboard query, JSON columns only where truly schemaless data was needed, and partitioning on the notification log table by month. A dual-write phase kept legacy and new databases in sync while queued backfill jobs migrated 40M rows with zero downtime.',
+        'step1.t': 'Schema design & zero-downtime migration',
+        'step1.d': 'New MySQL schema modelled on access patterns. Dual-write + queued backfill jobs moved 40M rows with zero downtime. Hot queries went from 2.4s to 40ms.',
+        'step2.t': 'Laravel API & strangler migration',
+        'step2.d': 'Strictly-typed PHP 8.3 with Laravel: modular monolith boundaries, Form Request validation and OpenAPI docs. 34 endpoints migrated behind a proxy, one route at a time.',
+        'step3.t': 'React dashboard frontend',
+        'step3.d': 'React SPA served by Laravel for instant navigation. React Query caching cut API calls from 47 to 6 on initial load. Laravel Echo + WebSockets for real-time logs.',
+        'step4.t': 'Testing & CI/CD',
+        'step4.d': 'Pest unit tests, Playwright e2e flows for the critical paths, GitHub Actions pipeline with preview environments per PR. Coverage gate at 85%.',
+        'step5.t': 'Observability & handover',
+        'step5.d': 'Structured logging, Grafana dashboards and alerting on p95 latency and error rates. Pairing sessions with the in-house team for a smooth handover.',
+        'cap2': 'Final dashboard: server-rendered panels, real-time WebSocket log stream, and the workflow builder.',
+        'beforeCap': 'Before — legacy jQuery dashboard, 4.1s load, 47 API calls',
+        'afterCap': 'After — Laravel + React dashboard, 1.3s LCP, 6 API calls, real-time updates',
+        'dec.h': 'Key technical decisions',
+        'dec1.h': 'Partitioning the notification log',
+        'dec1.p': 'The log table grew by ~2M rows a week and was the single biggest latency source. I partitioned it monthly in MySQL and added covering indexes for the three dashboard query shapes. Combined with keyset pagination replacing OFFSET queries, p95 response time dropped from 2.4s to under 200ms — without touching application code.',
+        'dec2.h': 'Real-time logs over WebSocket',
+        'dec2.p': 'Previously the dashboard polled the notification log every 10 seconds — 6 requests per minute per open tab. I replaced this with a Redis pub/sub layer feeding Laravel Echo over WebSockets. Users now see events within 100ms of them firing, and backend load from dashboard traffic dropped 90%.',
+        'dec3.h': 'SSR first paint + React Query',
+        'dec3.p': 'Static panels (stats, channel health) are server-rendered by Laravel with the initial HTML; interactive panels hydrate on demand through a cached React Query layer with optimistic mutations. First load went from 47 API calls to 6, and LCP from 4.1s to 1.3s on mid-range hardware.',
+        'res.h': 'Results',
+        'res.p': 'The rebuild shipped in week 6, exactly on schedule. Metrics were tracked over the following 6 weeks post-launch compared to the same prior period.',
+        'res.list': '<li><strong>Page load time (p95):</strong> 4.1s → 1.6s (−60%)</li><li><strong>Average API response time:</strong> −70%</li><li><strong>Trial-to-paid conversion rate:</strong> +27%</li><li><strong>Onboarding completion (first notification live):</strong> 21% → 68%</li><li><strong>Deploys per week:</strong> 1 → 12 (CI/CD pipeline)</li><li><strong>Uptime since launch:</strong> 99.98%</li>',
+        'res.q': '"Vikri Alva Pratama rebuilt our platform end to end while we kept shipping features. Six weeks later everything is faster, deploys take minutes instead of days, and conversion is up 27%. Exceptionally thorough process and a pleasure to work with."',
+        'refl.h': 'Reflections',
+        'refl.p1': 'The biggest lesson from this project: most "slow product" complaints are really architecture complaints. The frontend was blamed for years, but 80% of the latency lived in N+1 queries and missing indexes. Measuring before rewriting meant we fixed the right things first.',
+        'refl.p2': 'If I were to do it again, I\'d push harder for a longer discovery phase. Six weeks is tight for a full-stack rebuild, and we made two schema decisions based on incomplete access-pattern data that needed revision in month two. The strangler approach absorbed both changes safely — but another week of profiling up front would have caught them earlier.',
+        'outro': 'Interested in a similar engagement? <a href="index.html#contact">Get in touch</a> — I\'m available for new projects from Q2 2025.',
+        'more.h': 'More projects', 'more.all': 'View all →', 'more.allm': 'View all projects →',
+        'card.view': 'View project →',
+        'cta.eyebrow': 'Ready to start?', 'cta.title': 'Got a similar project?',
+        'cta.p': 'I\'m available for new projects. Tell me about what you\'re building and let\'s see if we\'re a good fit.',
+        'cta.btn': 'Start a project',
+        'foot.rights': 'All rights reserved.', 'foot.dev': 'Developed by', 'foot.dist': 'Distributed by', 'foot.built': 'Built with'
+      },
+      id: {
+        'nav.services': 'Layanan', 'nav.work': 'Karya', 'nav.about': 'Tentang', 'nav.blog': 'Blog', 'nav.contact': 'Kontak', 'nav.hire': 'Rekrut saya',
+        'cs.back': 'Kembali ke proyek', 'cs.date': '2025 · 6 minggu',
+        'cs.title': 'Novu — Rebuild Dashboard SaaS',
+        'cs.lede': 'Rebuild full-stack platform manajemen notifikasi B2B — skema database baru, API real-time, dan frontend dashboard yang cepat. Muat halaman 60% lebih cepat, konversi trial-ke-berbayar naik 27%.',
+        'meta.client': 'Klien', 'meta.role': 'Peran', 'meta.timeline': 'Linimasa', 'meta.stack': 'Stack',
+        'stat1': 'Waktu muat halaman (p95)', 'stat2': 'Konversi trial-ke-berbayar', 'stat3': 'Waktu respons API (rata-rata)', 'stat4': 'Uptime sejak rilis',
+        'b.h1': 'Brief proyek',
+        'b.p1': 'Novu adalah platform infrastruktur notifikasi B2B — memungkinkan developer me-rute, mengelola, dan memantau notifikasi lewat kanal email, SMS, push, dan in-app. Backendnya monolith PHP berusia dua tahun tanpa batas modul yang jelas, dashboardnya jQuery server-rendered, dan setiap fitur baru makin lama makin lambat dirilis. Awal 2025, deploy paling cepat mingguan, muat halaman sering lebih dari empat detik, dan churn di masa trial 14 hari terus naik.',
+        'b.p2': 'Mandat saya sederhana: bangun ulang platform dari ujung ke ujung tanpa membekukan pengembangan fitur. Anggarannya tetap dan waktu kita enam minggu untuk beralih.',
+        'b.q': '"Kami kehilangan pengguna di 20 menit pertama. Mereka daftar, lihat dashboard, langsung pergi. Produknya persis seperti yang mereka butuhkan — mereka hanya tidak bisa mengaksesnya cukup cepat."',
+        'b.h2': 'Discovery & audit teknis',
+        'b.h2a': 'Audit sistem yang ada',
+        'b.p3': 'Saya menghabiskan minggu pertama untuk memetakan arsitektur yang ada dan menambahkan instrumentasi ke semuanya. Temuannya brutal tapi bisa ditebak:',
+        'b.list1': '<li>Dashboard membuat 47 panggilan API saat muat pertama — banyak yang duplikat atau berurutan padahal bisa paralel</li><li>Tidak ada indeks database di tiga jalur query tersibuk; query log notifikasi melakukan full table scan atas 40 juta baris</li><li>Logika bisnis bocor ke controller maupun template — nol test coverage di mana pun</li><li>Pengguna trial secara spesifik ingin jalur "notifikasi pertama Anda tayang", bukan gambaran fitur</li>',
+        'b.h2b': 'Profiling',
+        'b.p4': 'Saya mem-profile perjalanan pengguna paling lambat dengan distributed tracing dan menemukan bahwa 80% latensi dashboard berasal dari query N+1 dan endpoint list tanpa paginasi. Ini memberi tahu saya persis di mana rewrite akan terbayar paling cepat.',
+        'cap1': 'Arsitektur yang ada dengan titik panas latensi dianotasi selama fase audit.',
+        'strat.h': 'Strategi teknis',
+        'strat.p': 'Berdasarkan audit, saya menyusun rencana rebuild di sekitar tiga prinsip:',
+        'pr1.t': 'Strangler, bukan big bang',
+        'pr1.d': 'Service Laravel baru diletakkan di belakang proxy berdampingan dengan monolith lama. Route dimigrasikan satu per satu — tanpa akhir pekan cutover yang berisiko.',
+        'pr2.t': 'Schema-first',
+        'pr2.d': 'Skema MySQL bersih dengan indeks dan constraint yang dirancang sebelum kode API apa pun. Migrasi ter-versioning dan reversibel.',
+        'pr3.t': 'Teruji sejak hari pertama',
+        'pr3.d': 'Test unit PHPUnit + e2e Playwright di CI untuk setiap PR yang di-merge. Gerbang coverage di codebase baru: minimal 85% sebelum apa pun dirilis.',
+        'proc.h': 'Proses',
+        'proc.w1': 'Minggu 1 · Migrasi skema & data',
+        'proc.p': 'Saya memodelkan skema MySQL baru berdasarkan pola akses alih-alih entitas: composite index untuk setiap query dashboard, kolom JSON hanya di tempat yang benar-benar butuh data schemaless, dan partisi bulanan pada tabel log notifikasi. Fase dual-write menjaga database lama dan baru tetap sinkron sementara job backfill berbasis queue memindahkan 40 juta baris tanpa downtime.',
+        'step1.t': 'Desain skema & migrasi tanpa downtime',
+        'step1.d': 'Skema MySQL baru dimodelkan dari pola akses. Dual-write + job backfill berbasis queue memindahkan 40 juta baris tanpa downtime. Query panas turun dari 2,4 dtk ke 40 ms.',
+        'step2.t': 'API Laravel & migrasi strangler',
+        'step2.d': 'PHP 8.3 strictly-typed dengan Laravel: batas modul lewat modular monolith, validasi Form Request, dan dokumentasi OpenAPI. 34 endpoint dimigrasikan di balik proxy, satu route demi satu route.',
+        'step3.t': 'Frontend dashboard React',
+        'step3.d': 'SPA React yang disajikan Laravel untuk navigasi instan. Caching React Query memangkas panggilan API dari 47 menjadi 6 saat muat awal. Laravel Echo + WebSocket untuk log real-time.',
+        'step4.t': 'Testing & CI/CD',
+        'step4.d': 'Test unit Pest, alur e2e Playwright untuk jalur kritis, pipeline GitHub Actions dengan preview environment per PR. Gerbang coverage di 85%.',
+        'step5.t': 'Observability & serah terima',
+        'step5.d': 'Logging terstruktur, dashboard Grafana, dan alerting pada latensi p95 serta error rate. Sesi pairing dengan tim internal untuk serah terima mulus.',
+        'cap2': 'Dashboard final: panel server-rendered, aliran log WebSocket real-time, dan workflow builder.',
+        'beforeCap': 'Sebelum — dashboard jQuery lama, muat 4,1 dtk, 47 panggilan API',
+        'afterCap': 'Sesudah — dashboard Laravel + React, LCP 1,3 dtk, 6 panggilan API, pembaruan real-time',
+        'dec.h': 'Keputusan teknis kunci',
+        'dec1.h': 'Partisi log notifikasi',
+        'dec1.p': 'Tabel log bertambah ~2 juta baris per minggu dan jadi sumber latensi terbesar. Saya mem-partisi-nya bulanan di MySQL dan menambah covering index untuk tiga bentuk query dashboard. Dikombinasikan dengan keyset pagination yang menggantikan query OFFSET, waktu respons p95 turun dari 2,4 dtk ke di bawah 200 ms — tanpa menyentuh kode aplikasi.',
+        'dec2.h': 'Log real-time via WebSocket',
+        'dec2.p': 'Sebelumnya dashboard polling log notifikasi tiap 10 detik — 6 request per menit per tab terbuka. Saya ganti dengan lapisan Redis pub/sub yang memberi makan Laravel Echo lewat WebSocket. Pengguna kini melihat event dalam 100 ms sejak terjadi, dan beban backend dari trafik dashboard turun 90%.',
+        'dec3.h': 'SSR first paint + React Query',
+        'dec3.p': 'Panel statis (statistik, kesehatan kanal) dirender server-side oleh Laravel bersama HTML awal; panel interaktif di-hydrate sesuai permintaan melalui lapisan React Query ter-cache dengan mutasi optimistis. Muat pertama turun dari 47 panggilan API menjadi 6, dan LCP dari 4,1 dtk ke 1,3 dtk di perangkat kelas menengah.',
+        'res.h': 'Hasil',
+        'res.p': 'Rebuild rilis di minggu ke-6, tepat sesuai jadwal. Metrik dipantau selama 6 minggu pasca-rilis dibanding periode sebelumnya.',
+        'res.list': '<li><strong>Waktu muat halaman (p95):</strong> 4,1 dtk → 1,6 dtk (−60%)</li><li><strong>Rata-rata waktu respons API:</strong> −70%</li><li><strong>Konversi trial-ke-berbayar:</strong> +27%</li><li><strong>Penyelesaian onboarding (notifikasi pertama tayang):</strong> 21% → 68%</li><li><strong>Deploy per minggu:</strong> 1 → 12 (pipeline CI/CD)</li><li><strong>Uptime sejak rilis:</strong> 99,98%</li>',
+        'res.q': '"Vikri Alva Pratama membangun ulang platform kami dari ujung ke ujung sementara kami tetap merilis fitur. Enam minggu kemudian semuanya lebih cepat, deploy hanya butuh hitungan menit bukan hari, dan konversi naik 27%. Prosesnya sangat teliti dan menyenangkan untuk diajak bekerja sama."',
+        'refl.h': 'Refleksi',
+        'refl.p1': 'Pelajaran terbesar dari proyek ini: sebagian besar keluhan "produksinya lambat" sebenarnya keluhan arsitektur. Frontend disalahkan bertahun-tahun, tapi 80% latensi ada di query N+1 dan indeks yang hilang. Mengukur sebelum menulis ulang membuat kami memperbaiki hal yang benar lebih dulu.',
+        'refl.p2': 'Kalau harus mengulanginya, saya akan mendorong fase discovery yang lebih panjang. Enam minggu itu mepet untuk rebuild full-stack, dan kami membuat dua keputusan skema berdasarkan data pola akses yang belum lengkap hingga perlu revisi di bulan kedua. Pendekatan strangler menyerap kedua perubahan itu dengan aman — tapi satu minggu profiling tambahan di awal akan menangkapnya lebih cepat.',
+        'outro': 'Tertarik dengan kolaborasi serupa? <a href="index.html#contact">Hubungi saya</a> — saya terbuka untuk proyek baru mulai Kuartal II 2025.',
+        'more.h': 'Proyek lainnya', 'more.all': 'Lihat semua →', 'more.allm': 'Lihat semua proyek →',
+        'card.view': 'Lihat proyek →',
+        'cta.eyebrow': 'Siap memulai?', 'cta.title': 'Punya proyek serupa?',
+        'cta.p': 'Saya terbuka untuk proyek baru. Ceritakan apa yang sedang Anda bangun, dan mari lihat apakah kami cocok.',
+        'cta.btn': 'Mulai proyek',
+        'foot.rights': 'Hak cipta dilindungi.', 'foot.dev': 'Dikembangkan oleh', 'foot.dist': 'Didistribusikan oleh', 'foot.built': 'Dibangun dengan'
+      }
+    };
+
+    window.getLang = window.getLang || function () { return localStorage.getItem('lang') === 'id' ? 'id' : 'en'; };
+
+    function apply() {
+      var d = I18N[window.getLang()];
+      document.querySelectorAll('[data-i18n]').forEach(function (el) {
+        var v = d[el.getAttribute('data-i18n')];
+        if (v != null) el.textContent = v;
+      });
+      document.querySelectorAll('[data-i18n-html]').forEach(function (el) {
+        var v = d[el.getAttribute('data-i18n-html')];
+        if (v != null) el.innerHTML = v;
+      });
+      document.documentElement.setAttribute('lang', window.getLang());
+      document.querySelectorAll('[data-lang-toggle] [data-l]').forEach(function (el) {
+        el.classList.toggle('text-accent', el.getAttribute('data-l') === window.getLang());
+      });
+    }
+
+    window.setLang = window.setLang || function (lang) {
+      localStorage.setItem('lang', lang);
+      apply();
+      document.dispatchEvent(new CustomEvent('langchange', { detail: { lang: lang } }));
+    };
+
+    document.addEventListener('DOMContentLoaded', apply);
+  })();
+  </script>
+
+</body>
+</html>
