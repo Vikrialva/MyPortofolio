@@ -17,3 +17,9 @@ npm-debug.log*
 
 # Dependencies
 node_modules/
+
+# Runtime data & secrets
+data/
+uploads/
+*.db
+*.db-journal

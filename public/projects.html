@@ -84,6 +84,19 @@
 
     <section class="pb-24">
       <div class="max-w-6xl mx-auto px-6">
+        <div class="flex flex-wrap gap-2 mb-8" role="group" aria-label="Filter projects">
+          <template x-for="f in filterOptions" :key="f.value">
+            <button
+              @click="filter = f.value"
+              :aria-pressed="filter === f.value"
+              :class="filter === f.value
+                ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 border-zinc-900 dark:border-white'
+                : 'bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-300 border-zinc-200 dark:border-zinc-800 hover:border-accent hover:text-accent'"
+              class="text-sm px-4 py-2 rounded-full border transition-colors"
+              x-text="lang === 'id' ? f.labelId : f.label"></button>
+          </template>
+        </div>
+
         <!--
           CORRECTIF : on itere sur TOUS les projets, x-show + x-transition gerent
           la visibilite de chaque carte. L'ancienne version utilisait x-for sur
@@ -116,6 +129,7 @@
                   <a :href="p.url" :target="p.url.startsWith('http') ? '_blank' : null" :rel="p.url.startsWith('http') ? 'noopener noreferrer' : null">
                     <h3 class="font-display font-bold text-lg text-zinc-900 dark:text-white mb-2 group-hover:text-accent transition-colors" x-text="p.title"></h3>
                   </a>
+                  <p class="text-xs text-zinc-400 -mt-1 mb-2" x-show="p.subtitle" x-text="p.subtitle"></p>
                   <p class="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed mb-4" x-text="lang==='id' ? p.descId : p.desc"></p>
                   <div class="flex items-center justify-between">
                     <a :href="p.url" :target="p.url.startsWith('http') ? '_blank' : null" :rel="p.url.startsWith('http') ? 'noopener noreferrer' : null" class="inline-flex items-center gap-1.5 text-sm font-medium text-zinc-900 dark:text-white nav-link"><span data-i18n="card.view">View project →</span></a>
@@ -164,25 +178,88 @@
         filter: 'all',
         lang: 'en',
 
-        filterOptions: [
-          { value: 'all',       label: 'All (10)',      labelId: 'Semua (10)' },
-          { value: 'saas',      label: 'SaaS',          labelId: 'SaaS' },
-          { value: 'webapp',    label: 'Web App',       labelId: 'Aplikasi Web' },
-          { value: 'api',       label: 'API & Backend', labelId: 'API & Backend' },
-          { value: 'ecommerce', label: 'E-commerce',    labelId: 'E-commerce' },
-        ],
+        filterOptions: [],
 
-        allProjects: [
-          { id:11, title:'Website ERP',            category:'webapp',    categoryLabel:'Web App',        tags:['Web App','Laravel','MySQL'],          year:'2026', desc:'Web-based ERP application: inventory, purchasing and sales modules, accounting reports, and role-based user management — built with Laravel and MySQL.',       descId:'Aplikasi ERP berbasis web: modul inventaris, pembelian dan penjualan, laporan akuntansi, serta manajemen pengguna berbasis peran — dibangun dengan Laravel dan MySQL.', img:'website_erp/website-erp-1.png', images:['website_erp/website-erp-1.png','website_erp/website-erp-2.jpg','website_erp/website-erp-3.jpg','website_erp/website-erp-4.jpg','website_erp/website-erp-5.jpg'], url:'index.html#work' },
-          { id:10, title:'Web Sekolah',            category:'webapp',    categoryLabel:'Web App',        tags:['Web App','Laravel','MySQL'],          year:'2026', desc:'Complete school website: profile, news & announcements, photo gallery and contact — built with Laravel and MySQL on a responsive Tailwind UI.',                 descId:'Situs web sekolah lengkap: profil, berita & pengumuman, galeri foto, dan kontak — dibangun dengan Laravel dan MySQL, antarmuka responsif Tailwind.',              img:'websekolah/websekolah-1.png', images:['websekolah/websekolah-1.png','websekolah/websekolah-2.jpg','websekolah/websekolah-3.jpg','websekolah/websekolah-4.jpg'], url:'https://github.com/prayogi762/projek_smea' },
-        ],
+        allProjects: [],
+
+        get visibleCount() {
+          return this.allProjects.filter(
+            p => this.filter === 'all' || p.category === this.filter
+          ).length;
+        },
+
+        slugify(s) {
+          return String(s || '')
+            .toLowerCase()
+            .trim()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '') || 'lainnya';
+        },
+
+        mapProject(p) {
+          const en = (p.locales && p.locales.en) || {};
+          const id = (p.locales && p.locales.id) || {};
+          const pick = (o) => Object.keys(o).length ? o : en;
+          const lo = pick(this.lang === 'id' ? id : en);
+          const lblEn = en.category || '';
+          const lblId = id.category || lblEn;
+          return {
+            id: p.id,
+            title: lo.title || p.slug,
+            subtitle: lo.subtitle || '',
+            category: this.slugify(lblEn || lblId),
+            categoryLabel: this.lang === 'id' ? lblId : lblEn,
+            tags: Array.isArray(lo.tags) ? lo.tags : [],
+            year: String(p.created_at || '').slice(0, 4),
+            desc: en.desc || '',
+            descId: id.desc || en.desc || '',
+            img: p.cover || (p.images && p.images[0]) || '',
+            images: p.images && p.images.length ? p.images : p.cover ? [p.cover] : [],
+            url: p.repo_url || p.live_url || 'index.html#work'
+          };
+        },
+
+        async loadProjects() {
+          try {
+            const res = await fetch('/api/content');
+            const data = await res.json();
+            this.allProjects = (data.projects || []).map(p => this.mapProject(p));
+
+            const cats = [];
+            this.allProjects.forEach(p => {
+              const found = cats.find(c => c.value === p.category);
+              if (found) found.count++;
+              else {
+                cats.push({
+                  value: p.category,
+                  label: p.categoryLabel,
+                  labelId: p.categoryLabel,
+                  count: 1
+                });
+              }
+            });
+            const t = this.lang === 'id' ? 'Semua' : 'All';
+            const ti = this.lang === 'id' ? 'Semua' : 'All';
+            this.filterOptions = [
+              { value: 'all', label: `${t} (${this.allProjects.length})`, labelId: `${ti} (${this.allProjects.length})` },
+              ...cats
+            ];
+          } catch (e) {
+            this.allProjects = [];
+          }
+        },
 
         init() {
           this.dark = localStorage.getItem('theme') === 'dark'
             || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
           this.lang = window.getLang();
-          document.addEventListener('langchange', e => { this.lang = e.detail.lang; });
+          document.addEventListener('langchange', e => {
+            this.lang = e.detail.lang;
+            this.loadProjects();
+          });
+
+          this.loadProjects();
 
           window.addEventListener('scroll', () => {
             this.scrolled = window.scrollY > 20;
